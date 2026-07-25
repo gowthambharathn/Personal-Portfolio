@@ -177,6 +177,15 @@ document.addEventListener('click', (e) => {
   }
 });
 
+// "View Certificate" buttons open the same certificate image the
+// card thumbnail shows, rather than navigating to a separate page.
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.cert-link[data-cert-img]');
+  if (btn) {
+    openLightbox(btn.dataset.certImg, btn.dataset.certAlt || 'Certificate');
+  }
+});
+
 lightboxClose.addEventListener('click', () => closeLightbox());
 
 // Click outside the image (on the dark backdrop) closes it
