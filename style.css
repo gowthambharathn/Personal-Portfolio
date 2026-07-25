@@ -37,6 +37,11 @@ body {
   overflow-x: hidden;
 }
 
+/* Locks page scroll while the lightbox is open */
+body.lightbox-open {
+  overflow: hidden;
+}
+
 .bg-grid {
   position: fixed;
   top: 0;
@@ -186,12 +191,18 @@ header {
   box-shadow: 0 0 50px rgba(0, 119, 255, 0.4);
   margin-bottom: 2.5rem;
   background: var(--card-black);
-  animation: floatY 6s ease-in-out infinite;
+  animation: floatY 6s ease-in-out infinite, heroPop 0.9s cubic-bezier(0.165, 0.84, 0.44, 1) both;
+  cursor: zoom-in;
 }
 
 @keyframes floatY {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
+}
+
+@keyframes heroPop {
+  0% { opacity: 0; transform: scale(0.85); }
+  100% { opacity: 1; transform: scale(1); }
 }
 
 .hero-img-wrap {
@@ -219,6 +230,7 @@ header {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: 1px;
+  animation: heroRise 0.8s 0.15s cubic-bezier(0.165, 0.84, 0.44, 1) both;
 }
 
 .hero p {
@@ -228,6 +240,12 @@ header {
   text-transform: uppercase;
   font-weight: 300;
   margin-top: 0.75rem;
+  animation: heroRise 0.8s 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) both;
+}
+
+@keyframes heroRise {
+  0% { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 .scroll-cue {
@@ -307,7 +325,7 @@ h2::before {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   padding: 2.5rem;
-  border-radius: 14px;
+  border-radius: 16px;
   border: 1px solid var(--border-soft);
   box-shadow:
     0 8px 30px rgba(0, 0, 0, 0.6),
@@ -384,34 +402,6 @@ h2::before {
   border-color: var(--neon-blue-glow);
 }
 
-.cert-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 2rem;
-}
-
-.cert-btn {
-  display: block;
-  padding: 18px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--neon-blue);
-  border-radius: 40px;
-  text-align: center;
-  text-decoration: none;
-  color: white;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.8rem;
-  letter-spacing: 2px;
-  transition: var(--transition);
-}
-
-.cert-btn:hover,
-.cert-btn:focus-visible {
-  background: var(--neon-blue);
-  color: #000;
-  box-shadow: 0 0 25px var(--neon-blue);
-}
-
 .contact-center {
   text-align: center;
   padding: 4rem 0;
@@ -445,6 +435,7 @@ h2::before {
   color: var(--neon-blue-glow) !important;
   text-shadow: 0 0 12px rgba(0, 210, 255, 0.6);
 }
+
 .photo-gallery {
   padding: 60px 20px;
   text-align: center;
@@ -486,21 +477,6 @@ h2::before {
   background: none;
 }
 
-.gallery-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  opacity: 0;
-  transform: scale(1.04);
-  transition: opacity 0.5s ease, transform 0.6s ease;
-}
-
-.gallery-item img.loaded {
-  opacity: 1;
-  transform: scale(1);
-}
-
 .gallery-item figcaption {
   position: absolute;
   inset: auto 0 0 0;
@@ -512,6 +488,8 @@ h2::before {
   text-align: left;
   transform: translateY(6px);
   opacity: 0.92;
+  z-index: 2;
+  pointer-events: none;
 }
 
 .gallery-item figcaption strong {
@@ -577,6 +555,10 @@ h2::before {
   box-shadow: 0 0 20px var(--neon-blue);
 }
 
+.back-to-top:active {
+  transform: scale(0.92);
+}
+
 :focus-visible {
   outline: 2px solid var(--neon-blue-glow);
   outline-offset: 3px;
@@ -591,42 +573,68 @@ footer {
 }
 
 /* =========================================================
-   REFINED PROJECT IMAGES & ACTION BUTTONS
+   IMAGE FRAMES — accept any aspect ratio without cropping
+   awkwardly or stretching. A blurred cover copy fills the
+   frame edge-to-edge; the real image sits on top scaled with
+   object-fit:contain so portrait, landscape, and 1:1 photos
+   all read as intentional, letterboxed thumbnails.
    ========================================================= */
-
-/* Project Screenshot Containers */
-.project-images {
-  display: flex;
-  gap: 12px;
-  margin: 1.2rem 0;
-  border-radius: 10px;
+.img-frame {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  border-radius: 12px;
   overflow: hidden;
-}
-
-.project-images img {
-  width: 50%;
-  height: 140px;
-  object-fit: cover;
-  object-position: top center;
-  border-radius: 10px;
+  background: #050505;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(0, 0, 0, 0.4);
-  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), 
-              border-color 0.4s ease, 
+  cursor: zoom-in;
+  isolation: isolate;
+  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1),
+              border-color 0.4s ease,
               box-shadow 0.4s ease;
 }
 
-.project-images img:hover {
-  transform: translateY(-2px) scale(1.02);
+.img-frame:hover {
+  transform: translateY(-2px) scale(1.015);
   border-color: rgba(0, 210, 255, 0.6);
   box-shadow: 0 6px 20px rgba(0, 119, 255, 0.25);
+}
+
+.img-frame-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(20px) brightness(0.55) saturate(1.15);
+  transform: scale(1.2);
+  z-index: 0;
+}
+
+.img-frame-fg {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* =========================================================
+   REFINED PROJECT IMAGES & ACTION BUTTONS
+   ========================================================= */
+
+.project-images {
+  display: flex;
+  gap: 12px;
+  margin: 1.3rem 0;
 }
 
 /* Project Action Links / Buttons */
 .project-links {
   display: flex;
   gap: 10px;
-  margin-top: 1.2rem;
+  margin-top: 1.3rem;
   flex-wrap: wrap;
 }
 
@@ -634,8 +642,9 @@ footer {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
-  border-radius: 8px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 10px;
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -644,6 +653,10 @@ footer {
   transition: var(--transition);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+}
+
+.proj-link:active {
+  transform: scale(0.96);
 }
 
 /* GitHub Link Styling */
@@ -686,6 +699,199 @@ footer {
   fill: currentColor;
   flex-shrink: 0;
 }
+
+/* =========================================================
+   CERTIFICATES SECTION
+   ========================================================= */
+.cert-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
+}
+
+.cert-card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  padding: 2.2rem 2rem;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  transition: var(--transition);
+}
+
+.cert-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(0, 119, 255, 0.5);
+  box-shadow: 0 20px 60px rgba(0, 119, 255, 0.25);
+}
+
+.cert-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 119, 255, 0.1);
+  border: 1px solid rgba(0, 119, 255, 0.4);
+  margin-bottom: 1.4rem;
+  transition: var(--transition);
+}
+
+.cert-card:hover .cert-icon {
+  background: var(--neon-blue);
+  box-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
+}
+
+.cert-icon svg {
+  width: 24px;
+  height: 24px;
+  fill: var(--neon-blue-glow);
+  transition: var(--transition);
+}
+
+.cert-card:hover .cert-icon svg {
+  fill: #000;
+}
+
+.cert-card h3 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.05rem;
+  color: #fff;
+  margin-bottom: 0.7rem;
+}
+
+.cert-card p {
+  color: var(--text-gray);
+  font-size: 0.88rem;
+  line-height: 1.7;
+  margin-bottom: 1.6rem;
+}
+
+.cert-link {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 10px;
+  background: rgba(0, 210, 255, 0.08);
+  border: 1px solid rgba(0, 210, 255, 0.35);
+  color: var(--neon-blue-glow);
+  text-decoration: none;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  transition: var(--transition);
+}
+
+.cert-link svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.3s ease;
+}
+
+.cert-link:hover,
+.cert-link:focus-visible {
+  background: var(--neon-blue);
+  color: #000;
+  border-color: var(--neon-blue-glow);
+  box-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
+}
+
+.cert-link:hover svg {
+  transform: translateX(3px);
+}
+
+.cert-link:active {
+  transform: scale(0.96);
+}
+
+/* =========================================================
+   LIGHTBOX — full-screen image preview
+   ========================================================= */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.94);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  padding: 5vh 5vw;
+}
+
+.lightbox.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.lightbox-img {
+  max-width: 100%;
+  max-height: 90vh;
+  border-radius: 8px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+  transform: scale(0.9);
+  opacity: 0;
+  transition: transform 0.35s cubic-bezier(0.165, 0.84, 0.44, 1),
+              opacity 0.35s ease;
+}
+
+.lightbox.active .lightbox-img {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.lightbox-close {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  z-index: 2001;
+}
+
+.lightbox-close svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.lightbox-close:hover,
+.lightbox-close:focus-visible {
+  background: var(--neon-blue);
+  border-color: var(--neon-blue-glow);
+  box-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
+}
+
 @media (max-width: 768px) {
   .nav-toggle { display: flex; }
 
@@ -725,10 +931,14 @@ footer {
     flex-direction: column;
   }
 
-  .project-images img {
-    width: 100%;
-    height: 160px;
+  .img-frame {
+    aspect-ratio: 16 / 10;
   }
 
   .contact-label { letter-spacing: 3px; }
+
+  .lightbox-close {
+    top: 14px;
+    right: 14px;
+  }
 }

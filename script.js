@@ -1,4 +1,6 @@
-// ---------- Mobile nav toggle ----------
+// =============================================================
+// Mobile nav toggle
+// =============================================================
 const navToggle = document.getElementById('navToggle');
 const navLinks = document.getElementById('navLinks');
 navToggle.addEventListener('click', () => {
@@ -14,7 +16,9 @@ navLinks.querySelectorAll('a').forEach(link => {
   });
 });
 
-// ---------- Scroll progress bar ----------
+// =============================================================
+// Scroll progress bar + back-to-top button
+// =============================================================
 const progressBar = document.getElementById('scrollProgress');
 const backToTop = document.getElementById('backToTop');
 function onScroll() {
@@ -31,7 +35,9 @@ backToTop.addEventListener('click', () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
-// ---------- Active nav link highlighting ----------
+// =============================================================
+// Active nav link highlighting
+// =============================================================
 const sections = document.querySelectorAll('section[id], .hero[id]');
 const navAnchors = document.querySelectorAll('.nav-links a');
 const navObserver = new IntersectionObserver((entries) => {
@@ -45,7 +51,9 @@ const navObserver = new IntersectionObserver((entries) => {
 }, { rootMargin: '-40% 0px -55% 0px' });
 sections.forEach(sec => navObserver.observe(sec));
 
-// ---------- Scroll-reveal animation ----------
+// =============================================================
+// Scroll-reveal animation
+// =============================================================
 const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
@@ -56,12 +64,16 @@ const revealObserver = new IntersectionObserver((entries) => {
 }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
 document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-// ---------- Lazy-loaded gallery images ----------
-// Images are only requested once they're near the viewport, each figure
-// shows a shimmer skeleton until its photo has finished loading, then
-// fades in. If a load genuinely fails (wrong path / case mismatch /
-// missing file) the figure now shows a visible "Image unavailable"
-// state instead of shimmering forever with no explanation.
+// =============================================================
+// Lazy-loaded gallery images
+// Each figure builds the same "img-frame" structure used by the
+// project cards (a blurred cover backdrop + a contained foreground
+// image) so screenshots and square photos both sit nicely inside
+// the fixed 4:3 gallery tile without stretching or ugly crops.
+// A shimmer skeleton shows until the photo has loaded, then fades
+// in. A genuine load failure (bad path / missing file) now shows
+// a visible "Image unavailable" state instead of shimmering forever.
+// =============================================================
 const galleryItems = document.querySelectorAll('.gallery-item[data-src]');
 
 function loadGalleryImage(item) {
@@ -69,24 +81,34 @@ function loadGalleryImage(item) {
   if (!src || item.dataset.loading === 'true') return;
   item.dataset.loading = 'true';
 
-  const img = new Image();
-  img.alt = item.querySelector('figcaption strong')?.textContent || 'Gallery photo';
-  img.decoding = 'async';
+  const altText = item.querySelector('figcaption strong')?.textContent || 'Gallery photo';
 
-  img.onload = () => {
-    item.prepend(img);
+  const bg = new Image();
+  bg.className = 'img-frame-bg';
+  bg.alt = '';
+  bg.setAttribute('aria-hidden', 'true');
+  bg.decoding = 'async';
+
+  const fg = new Image();
+  fg.className = 'img-frame-fg zoomable';
+  fg.alt = altText;
+  fg.decoding = 'async';
+
+  fg.onload = () => {
+    item.appendChild(bg);
+    item.appendChild(fg);
     requestAnimationFrame(() => {
-      img.classList.add('loaded');
       item.classList.add('loaded');
     });
   };
 
-  img.onerror = () => {
+  fg.onerror = () => {
     console.error('Failed to load image:', src);
     item.classList.add('load-error');
   };
 
-  img.src = src;
+  bg.src = src;
+  fg.src = src;
 }
 
 const imgObserver = new IntersectionObserver((entries) => {
@@ -99,3 +121,75 @@ const imgObserver = new IntersectionObserver((entries) => {
 }, { rootMargin: '250px 0px' }); // start fetching a bit before it scrolls into view
 
 galleryItems.forEach(item => imgObserver.observe(item));
+
+// =============================================================
+// Lightbox — full-screen image preview
+//
+// Behaviour:
+//  - Clicking any ".zoomable" image opens it full-screen.
+//  - Works for images present at page load AND images the
+//    gallery loader inserts later (delegated click listener).
+//  - Closing works via the close button, ESC, or clicking the
+//    dark backdrop outside the image.
+//  - Pressing the browser Back button closes the preview and
+//    returns to the exact scroll position instead of navigating
+//    away, because opening the lightbox only adds a lightweight
+//    history entry (no page reload happens at any point).
+// =============================================================
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+const lightboxClose = document.getElementById('lightboxClose');
+let lightboxOpen = false;
+
+function openLightbox(src, alt) {
+  lightboxImg.src = src;
+  lightboxImg.alt = alt || 'Preview image';
+  lightbox.classList.add('active');
+  lightbox.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('lightbox-open');
+  lightboxOpen = true;
+  // Push a history entry so the Back button closes the preview
+  // instead of leaving the page. Scroll position is untouched
+  // since we never navigate anywhere.
+  history.pushState({ lightbox: true }, '');
+}
+
+function closeLightbox({ viaPopstate = false } = {}) {
+  if (!lightboxOpen) return;
+  lightbox.classList.remove('active');
+  lightbox.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('lightbox-open');
+  lightboxOpen = false;
+  // If the close happened via a UI action (not the Back button),
+  // pop the history entry we pushed so Back continues to behave
+  // predictably on subsequent presses.
+  if (!viaPopstate && history.state && history.state.lightbox) {
+    history.back();
+  }
+}
+
+// Delegated click listener catches both static and dynamically
+// inserted zoomable images (gallery + project frames).
+document.addEventListener('click', (e) => {
+  const img = e.target.closest('.zoomable');
+  if (img) {
+    openLightbox(img.currentSrc || img.src, img.alt);
+  }
+});
+
+lightboxClose.addEventListener('click', () => closeLightbox());
+
+// Click outside the image (on the dark backdrop) closes it
+lightbox.addEventListener('click', (e) => {
+  if (e.target === lightbox) closeLightbox();
+});
+
+// ESC key closes it
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && lightboxOpen) closeLightbox();
+});
+
+// Browser Back button closes it and restores scroll position
+window.addEventListener('popstate', () => {
+  if (lightboxOpen) closeLightbox({ viaPopstate: true });
+});
