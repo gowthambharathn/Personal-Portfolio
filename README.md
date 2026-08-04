@@ -66,7 +66,7 @@ You can view the portfolio online once deployed using **GitHub Pages**.
 
 ## 👨‍💻 About Me
 
-Hi, I'm **Gowtham Barath** — a Software Developer passionate about Artificial Intelligence, Android Development, and Full Stack Engineering.
+Hi, I'm **Gowtham Bharath** — a Software Developer passionate about Artificial Intelligence, Android Development, and Full Stack Engineering.
 
 I'm continuously building projects that solve real-world problems while expanding my knowledge in AI, cloud technologies, and scalable software architecture.
 
