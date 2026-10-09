@@ -248,6 +248,16 @@ header {
   100% { opacity: 1; transform: translateY(0); }
 }
 
+/* Hero resume buttons */
+.hero-actions {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+  animation: heroRise 0.8s 0.45s cubic-bezier(0.165, 0.84, 0.44, 1) both;
+}
+
 .scroll-cue {
   position: absolute;
   bottom: 40px;
@@ -799,6 +809,88 @@ footer {
 }
 
 /* =========================================================
+   RESUME — buttons (hero + section) and section card
+   ========================================================= */
+.resume-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 46px;
+  padding: 0 28px;
+  border-radius: 10px;
+  background: var(--blue-gradient);
+  border: 1px solid var(--neon-blue-glow);
+  color: #000;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  text-decoration: none;
+  box-shadow: 0 0 20px rgba(0, 119, 255, 0.35);
+  transition: var(--transition);
+}
+
+.resume-btn:hover,
+.resume-btn:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: 0 0 30px rgba(0, 210, 255, 0.6);
+}
+
+.resume-btn:active {
+  transform: scale(0.96);
+}
+
+.resume-btn-outline {
+  background: rgba(0, 210, 255, 0.08);
+  color: var(--neon-blue-glow);
+  box-shadow: none;
+}
+
+.resume-btn-outline:hover,
+.resume-btn-outline:focus-visible {
+  background: var(--neon-blue);
+  color: #000;
+  border-color: var(--neon-blue-glow);
+  box-shadow: 0 0 25px rgba(0, 210, 255, 0.5);
+}
+
+.resume-card {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 2.8rem 2.2rem;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-soft);
+  border-radius: 16px;
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.6),
+    inset 0 0 20px rgba(255, 255, 255, 0.05);
+  transition: var(--transition);
+}
+
+.resume-card:hover {
+  border-color: rgba(0, 119, 255, 0.5);
+  box-shadow: 0 20px 60px rgba(0, 119, 255, 0.25);
+}
+
+.resume-card p {
+  color: var(--text-gray);
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+
+.resume-actions {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1.8rem;
+}
+
+/* =========================================================
    LIGHTBOX — full-screen image preview
    ========================================================= */
 .lightbox {
@@ -871,6 +963,9 @@ footer {
   box-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
 }
 
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
 @media (max-width: 768px) {
   .nav-toggle { display: flex; }
 
@@ -898,6 +993,19 @@ footer {
   }
 
   .hero h1 { font-size: 2.8rem; }
+
+  .hero-actions {
+    gap: 10px;
+    margin-top: 1.5rem;
+  }
+
+  .resume-btn {
+    height: 42px;
+    padding: 0 20px;
+    font-size: 0.7rem;
+  }
+
+  .resume-card { padding: 2rem 1.4rem; }
 
   .contact-value {
     font-size: 0.9rem;
